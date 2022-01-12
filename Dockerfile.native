@@ -1,0 +1,12 @@
+FROM ghcr.io/graalvm/graalvm-ce:latest AS BUILD
+RUN gu install native-image
+
+COPY build/libs/helloKtor-1.0-SNAPSHOT-all.jar helloKtor-1.0-SNAPSHOT-all.jar
+COPY reflection.json reflection.json
+COPY build.sh build.sh
+RUN ./build.sh
+
+FROM debian:bullseye-slim
+COPY --from=build /graal-server graal-server
+EXPOSE 8080
+CMD ["/graal-server", "-Xmx16m"]
